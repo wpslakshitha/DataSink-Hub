@@ -1,8 +1,8 @@
 import { getServerSession } from "next-auth";
-import { authOptions } from "../api/auth/[...nextauth]/route";
 import { redirect } from "next/navigation";
 import { PrismaClient } from "@prisma/client";
 import ProjectList from "@/components/ProjectList";
+import { authOptions } from "@/lib/auth";
 
 const prisma = new PrismaClient();
 
@@ -17,11 +17,11 @@ async function getProjects(userId: string) {
 export default async function DashboardPage() {
   const session = await getServerSession(authOptions);
 
-  if (!session || !session.user?.email) {
+  if (!session || !session.user?.id) {
     redirect("/");
   }
 
-  const projects = await getProjects(session.user.email);
+  const projects = await getProjects(session.user.id);
 
   return (
     <div className="container mx-auto p-8">
@@ -30,7 +30,7 @@ export default async function DashboardPage() {
           <h1 className="text-3xl font-bold">Your Projects</h1>
           <p className="text-muted-foreground">Manage your data collection projects.</p>
         </div>
-        <p>Welcome, {session.user?.name || session.user?.email}</p>
+        <p>Welcome, {session.user.name}</p>
       </div>
       <ProjectList initialProjects={projects} />
     </div>

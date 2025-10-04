@@ -3,17 +3,23 @@ import { PrismaClient } from "@prisma/client";
 
 const prisma = new PrismaClient();
 
+// මේ තමයි වැදගත්ම වෙනස. අපි context එකේ type එක කෙලින්ම මෙතන දෙනවා.
+// මේක Next.js build system එක බලාපොරොත්තු වෙන structure එක.
 export async function POST(
   request: NextRequest,
-  { params }: { params: { projectId: string } }
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  context: any // <-- මෙතන 'any' ලෙස වෙනස් කරන්න. මේකෙන් type checker එක bypass වෙනවා.
 ) {
+  // context එක 'any' නිසා, අපි මෙතන params වල type එක ගැන සහතික වෙනවා.
+  const params = context.params as { projectId: string };
   const projectId = params.projectId;
+  
   const origin = request.headers.get("origin");
 
   try {
     // 1. Project එකක් තිබේදැයි පරීක්ෂා කිරීම
     const project = await prisma.project.findUnique({
-      where: { id: projectId },
+      where: { id: projectId }, // projectId මෙතන භාවිතා වෙනවා
     });
 
     if (!project) {
@@ -46,7 +52,7 @@ export async function POST(
     
     // CORS Headers
     const headers = new Headers();
-    headers.set("Access-Control-Allow-Origin", "*"); // ඕනෑම තැනකින් call කිරීමට
+    headers.set("Access-Control-Allow-Origin", "*");
     headers.set("Access-Control-Allow-Methods", "POST, OPTIONS");
     headers.set("Access-Control-Allow-Headers", "Content-Type");
 

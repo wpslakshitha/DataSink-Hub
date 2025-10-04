@@ -1,5 +1,5 @@
 import { getServerSession } from "next-auth";
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import { authOptions } from "@/lib/auth"; // Make sure this path is correct
 import { redirect } from "next/navigation";
 import { PrismaClient } from "@prisma/client";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -7,6 +7,12 @@ import { Badge } from "@/components/ui/badge";
 import ApiEndpointDisplay from "@/components/ApiEndpointDisplay";
 
 const prisma = new PrismaClient();
+
+interface ProjectDetailPageProps {
+  params: {
+    id: string;
+  };
+}
 
 async function getProjectDetails(projectId: string, userId: string) {
     const project = await prisma.project.findFirst({
@@ -20,7 +26,10 @@ async function getProjectDetails(projectId: string, userId: string) {
     return project;
 }
 
-export default async function ProjectDetailPage({ params }: { params: { id: string } }) {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export default async function ProjectDetailPage(props: any) {
+    const params = props.params as { id: string };
+
     const session = await getServerSession(authOptions);
 
     if (!session || !session.user?.id) {

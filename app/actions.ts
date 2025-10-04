@@ -1,13 +1,13 @@
 "use server";
+import { authOptions } from "@/lib/auth";
 import { PrismaClient, Project } from "@prisma/client";
 import { getServerSession } from "next-auth";
-import { authOptions } from "./api/auth/[...nextauth]/route";
 
 const prisma = new PrismaClient();
 
 export async function createProjectAction({ name, allowedFields }: { name: string, allowedFields: string[] }): Promise<Project | null> {
     const session = await getServerSession(authOptions);
-    if (!session || !session.user?.email) {
+    if (!session || !session.user?.id) {
         return null;
     }
 
@@ -15,7 +15,7 @@ export async function createProjectAction({ name, allowedFields }: { name: strin
         data: {
             name,
             allowedFields,
-            userId: session.user.email,
+            userId: session.user.id,
         },
     });
 
